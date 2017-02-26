@@ -5,40 +5,53 @@ using UnityEngine;
 public class Flock : MonoBehaviour {
 
     public float speed = 0.001f;
-    float rotationSpeed = 4.0f;
+    public float rotationSpeed = 4.0f;
+    public float minSpeed = 0.8f;
+    public float maxSpeed = 2.0f;
     Vector3 averageHeading;
     Vector3 averagePosition;
-    float neighborDistance = 3.0f;
+
+    //How much fish swim off, increase to have little schooling
+    public float neighborDistance = 3.0f;
+    public Vector3 newGoalPos;
 
     bool turning = false;
 
 	// Use this for initialization
 	void Start () {
-        speed = Random.Range(0.5f, 1);
+        speed = Random.Range(minSpeed, maxSpeed);
+        //this.GetComponent<Animation>()["Motion"].speed = speed;
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    void OnTriggerEnter(Collider other)
     {
-        if (Vector3.Distance(transform.position, Vector3.zero) >= GlobalFlock.tankSize)
+        if (!turning)
         {
-            turning = true;
+            newGoalPos = this.transform.position - other.gameObject.transform.position;
         }
-        else
-        {
-            turning = false;
-        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        turning = false;
+    }
+
+    // Update is called once per frame
+    void Update ()
+    {
         if (turning)
         {
-            Vector3 direction = Vector3.zero - transform.position;
+            Vector3 direction = newGoalPos = newGoalPos - transform.position;
             transform.rotation = Quaternion.Slerp(transform.rotation,
                 Quaternion.LookRotation(direction),
                 rotationSpeed * Time.deltaTime);
-            speed = Random.Range(0.5f, 1);
+
+            speed = Random.Range(minSpeed, maxSpeed);
+            //this.GetComponent<Animation>()["Motion"].speed = speed;
         }
         else
         {
-            if (Random.Range(0, 5) < 1)
+            if (Random.Range(0, 10) < 1)
             {
                 ApplyRules();
             }
@@ -70,7 +83,7 @@ public class Flock : MonoBehaviour {
                     vcentre += go.transform.position;
                     groupSize++;
 
-                    if (dist < 1.0f)
+                    if (dist < 2.0f)
                     {
                         vavoid = vavoid + (this.transform.position - go.transform.position);
                     }
@@ -85,6 +98,7 @@ public class Flock : MonoBehaviour {
         {
             vcentre = vcentre / groupSize + (goalPos - this.transform.position);
             speed = gSpeed / groupSize;
+            //this.GetComponent<Animation>()["Motion"].speed = speed;
 
             Vector3 direction = (vcentre + vavoid) - transform.position;
 

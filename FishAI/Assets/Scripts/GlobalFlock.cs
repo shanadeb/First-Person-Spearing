@@ -8,13 +8,17 @@ public class GlobalFlock : MonoBehaviour {
     public GameObject goalPrefab;
     public static int tankSize = 5;
 
-    static int numFish = 10;
+    public static int numFish = 50;
     public static GameObject[] allFish = new GameObject[numFish];
 
     public static Vector3 goalPos = Vector3.zero;
 
 	// Use this for initialization
 	void Start () {
+        RenderSettings.fogColor = Camera.main.backgroundColor;
+        RenderSettings.fogDensity = 0.015f;
+        RenderSettings.fog = true;
+
 		for (int i = 0; i < numFish; i++)
         {
             Vector3 pos = new Vector3(Random.Range(-tankSize, tankSize),
